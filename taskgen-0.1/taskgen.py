@@ -114,7 +114,10 @@ def gen_periods(n, nsets, min, max, gran, dist):
 
 def gen_tasksets(options):
     x = StaffordRandFixedSum(options.n, options.util, options.nsets)
+    print(x)
+    print()
     periods = gen_periods(options.n, options.nsets, options.permin, options.permax, options.pergran, options.perdist)
+    print(periods)
     #iterate through each row (which represents utils for a taskset)
     for i in range(numpy.size(x, axis=0)):
         C = x[i] * periods[i]
@@ -251,9 +254,7 @@ def main():
         return 1
         
     options.format = options.format.replace("\\n", "\n")
-
     gen_tasksets(options)
-    
     return 0
     
 def print_help(parser):

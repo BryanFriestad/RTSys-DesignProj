@@ -1,18 +1,42 @@
 import copy
 class Server:
     clients = []
-
+    rate = -1
+    deadline = -1
+    
+    def __init__(self, rate, deadline):
+        self.rate = rate
+        self.deadline = deadline
+    
+    def __init__(self):
+        self.rate = -1
+        
+        
     def getRate(self):
-        total = 0
-        for client in clients:
-            total += client.getRate()
+        if(self.rate == -1):
+            total = 0
+            for client in self.clients:
+                total += client.getRate()
+            return total
+        else: return self.rate
     
     def getDeadline(self):
-        latest = 0
-        for client in clients:
-            if(client.getDeadline() > latest):
-                latest = client.getDeadline
-        return latest
+        if(self.rate == -1):
+            latest = 0
+            for client in self.clients:
+                if(client.getDeadline() > latest):
+                    latest = client.getDeadline
+            return latest
+        else: return self.deadline
+    
+    def getComputeTime(self):
+        if(self.rate == -1):
+            total = 0
+            for client in self.clients:
+                total += client.getComputeTime()
+            return total
+        else:
+            return self.getRate() * self.getDeadline()
     
     def isUnitServer(self):
         if(self.getRate() == 1):
@@ -32,10 +56,12 @@ class Server:
                 queue.append(client)
                 totalComputeTime += client.getCompute()
         return True
+    
     def sortClientsByDeadline(self):
         toSort = copy.deepcopy(self.clients)
         quickSort(toSort, 0, len(toSort)-1)
         return toSort
+        
 def convertToSingletonServers(taskset)
     for task in taskset:
         #task
