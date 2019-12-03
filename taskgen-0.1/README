@@ -6,10 +6,6 @@ numpy library (http://numpy.scipy.org/). It has been tested with
 Python 2.6.5 and numpy 1.4.1 and also Python 2.7 and the latest svn of
 numpy (as showing up on July, 12th).
 
-There isn't a website for the tool at the moment, so it is being
-distributed through the WATERS 2010 webpage. However, this initial
-release and any subsequent ones will be announced on the Rapita
-Systems blog at http://www.rapitasystems.com/blog.
 
 There isn't any documentation for the software either. However, if you
 type taskgen.py --help then you will get an insightful help message.
@@ -28,3 +24,9 @@ Just type 'make' in order to see the available install options.
 License
 ======================================================================
 Type 'taskgen.py --about'.
+
+
+note some code has been edited by me, Isaac. An example for running this with desired properties of the paper is to run:
+python taskgen.py -n 5 -p 5 -q 100. Which generates 5 task sets with period ranging from 5 to 100, and total utalization of .75.
+
+
