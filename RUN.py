@@ -1,5 +1,5 @@
 import copy
-class Server:
+class ServerEDF:
     clients = []
     rate = -1
     deadline = -1
@@ -8,10 +8,17 @@ class Server:
         self.rate = rate
         self.deadline = deadline
     
-    def __init__(self):
+    def __init__(self, clients, rate, deadline):
+        self.rate = rate
+        self.deadline = deadline
+        self.clients = clients
+    def __init__(self, clients):
         self.rate = -1
+        self.clients = clients
         
-        
+    def getClients(self): 
+        return self.clients
+    
     def getRate(self):
         if(self.rate == -1):
             total = 0
@@ -41,7 +48,7 @@ class Server:
     def isUnitServer(self):
         if(self.getRate() == 1):
             return true
-        else
+        else:
             return false
     
     def scheduleClientsEDF(self):
@@ -61,11 +68,69 @@ class Server:
         toSort = copy.deepcopy(self.clients)
         quickSort(toSort, 0, len(toSort)-1)
         return toSort
+
+class ServerDual:
         
-def convertToSingletonServers(taskset)
-    for task in taskset:
-        #task
+    def __init__(self, edfServer):
+        self.rate = 1 - edfServer.getRate()
+        self.deadline = edfServer.getDeadline()
+        self.edfServer = edfServer
     
+    def getRate(self):
+        return self.rate
+        
+    def convertToEDFServer(self):
+        return ServerEDF(self.edfServer.getClients(), self.rate, self.deadline)
+
+class runScheduler:
+    def pack(self,duals):
+        bins = []
+        binSpaces = []
+        
+        for dual in duals:
+            index = getEmptiestBinIndex(binSpaces)
+            if(binSpaces[index] < dual.getRate()):
+                bins.append([dual])
+                binSpaces.append(1-dual.getRate())
+            else:
+                bins[index].append(dual)
+        servers = []
+        for bin in bins:
+            serverSet = []
+            for dual in bin:
+                serverSet.append(dual.convertToEDFServer())           
+            servers.append(ServerEDF(serverSet))
+        return servers     
+            
+    def dual(self, servers):
+        duals = []
+        for server in servers:
+            duals.append(ServerDual(server))
+        return duals
+    def getEmptiestBinIndex(self,binSpaces):
+        min = binSpaces[0]
+        minIndex = 0
+        for ix, space in enumerate(binSpaces):
+            if space < min:
+                min = space
+                minIndex = ix
+        return minIndex
+    
+    def convertToSingletonServers(self,taskset):
+        '''
+        Taskset: list of tuples (rate, deadline)
+        '''
+        servers = []
+        for task in taskset:
+            singleton = ServerEDF(task[0], task[1])
+            servers.append(ServerEDF)
+        return servers
+        
+    def reduceToUniserver(self, servers):
+        while(len(servers) > 1):
+            servers = dual(servers)
+            servers = pack(servers)
+ 
 '''
 The following two functions were authored on GeeksforGeeks
    https://www.geeksforgeeks.org/python-program-for-quicksort/
