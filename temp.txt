@@ -1,0 +1,5 @@
+Plant segmentation is an important problem in creating autonomouse weeding solutions that target weeds without applying herbaciedes to the entire field. This will greatly reduce costs for farmers and reduce the envirmental impact of farming. Recent breakthrough in computer vision, particullarly with the advent of deep learning techniques, have made this task achivable.
+
+There were two major tasks that I completed for this project. The first was building a tool to label 1000 images of brocolli and lettuce. The second was using these labels and the Mask Rcnn Algorithim to train a Neural Network to be able to predict which pixels in an image belong to the target crop.
+
+Through this project I was able to learn to independently complete tasks, gain new knowledge on my own, and research deep learning technniques and how to apply them to real world problems. 

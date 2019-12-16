@@ -116,7 +116,6 @@ def gen_tasksets(options):
     x = StaffordRandFixedSum(options.n, options.util, options.nsets)
     print(x)
     print()
-    print(options.pergran)
     periods = gen_periods(options.n, options.nsets, options.permin, options.permax, options.pergran, options.perdist)
     print(periods)
     #iterate through each row (which represents utils for a taskset)

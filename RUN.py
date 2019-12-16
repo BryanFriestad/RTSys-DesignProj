@@ -1,20 +1,18 @@
 import copy
+from taskgen import StaffordRandFixedSum as genTaskRates
+from taskgen import gen_periods as genTaskPeriods
+import sys
 class ServerEDF:
     clients = []
     rate = -1
     deadline = -1
     
-    def __init__(self, rate, deadline):
-        self.rate = rate
-        self.deadline = deadline
-    
     def __init__(self, clients, rate, deadline):
         self.rate = rate
         self.deadline = deadline
         self.clients = clients
-    def __init__(self, clients):
-        self.rate = -1
-        self.clients = clients
+        self.rate = self.getRate()
+        self.deadline = self.getDeadline()
         
     def getClients(self): 
         return self.clients
@@ -68,7 +66,8 @@ class ServerEDF:
         toSort = copy.deepcopy(self.clients)
         quickSort(toSort, 0, len(toSort)-1)
         return toSort
-
+    def __str__(self):
+        return "Rate: " + str(self.rate) + " | Deadline: " + str(self.deadline)
 class ServerDual:
         
     def __init__(self, edfServer):
@@ -81,33 +80,52 @@ class ServerDual:
         
     def convertToEDFServer(self):
         return ServerEDF(self.edfServer.getClients(), self.rate, self.deadline)
+     
+    def __str__(self):
+        return "Rate: " + str(self.rate) + " | Deadline: " + str(self.deadline)
 
-class runScheduler:
+class RunScheduler:
     def pack(self,duals):
-        bins = []
-        binSpaces = []
-        
-        for dual in duals:
-            index = getEmptiestBinIndex(binSpaces)
-            if(binSpaces[index] < dual.getRate()):
-                bins.append([dual])
-                binSpaces.append(1-dual.getRate())
-            else:
-                bins[index].append(dual)
+        bins = self.worstFitBins(duals)
+
+        return self.convertBinsToServers(bins)  
+    
+    def convertBinsToServers(self,bins):
         servers = []
         for bin in bins:
             serverSet = []
             for dual in bin:
                 serverSet.append(dual.convertToEDFServer())           
-            servers.append(ServerEDF(serverSet))
-        return servers     
-            
+            servers.append(ServerEDF(serverSet, None, None))
+        
+        return servers
+        
+    def worstFitBins(self,duals):
+        bins = []
+        binSpaces = []
+        bins.append([])
+        for dual in duals:
+            if(len(binSpaces) == 0):
+                bins[0].append(dual)
+                binSpaces.append(1-dual.getRate())
+                
+            index = self.getEmptiestBinIndex(binSpaces)
+            #does not fit in emptiest bin
+            if(binSpaces[index] < dual.getRate()):
+                bins.append([dual])
+                binSpaces.append(1-dual.getRate())
+            else:
+                bins[index].append(dual)
+                binSpaces[index] -= dual.getRate()
+        return bins
+    
     def dual(self, servers):
         duals = []
         for server in servers:
             duals.append(ServerDual(server))
         return duals
-    def getEmptiestBinIndex(self,binSpaces):
+    
+    def getEmptiestBinIndex(self, binSpaces):
         min = binSpaces[0]
         minIndex = 0
         for ix, space in enumerate(binSpaces):
@@ -122,14 +140,17 @@ class runScheduler:
         '''
         servers = []
         for task in taskset:
-            singleton = ServerEDF(task[0], task[1])
-            servers.append(ServerEDF)
+            singleton = ServerEDF(None, task[0], task[1])
+            servers.append(singleton)
         return servers
         
     def reduceToUniserver(self, servers):
-        while(len(servers) > 1):
-            servers = dual(servers)
-            servers = pack(servers)
+        #while(len(servers) > 1):
+        servers = self.dual(servers)
+        for server in servers:
+            print(server)
+        print(len(servers))
+        servers = self.pack(servers)
  
 '''
 The following two functions were authored on GeeksforGeeks
@@ -170,5 +191,29 @@ def quickSort(arr,low,high):
         # partition and after partition 
         quickSort(arr, low, pi-1) 
         quickSort(arr, pi+1, high)            
+
+if __name__ == "__main__":
+    #generate 100 task sets with n tasks = 17
+    
+    nTasks = 17
+    minPeriod = 5
+    maxPeriod = 100
+    periodGranularity = minPeriod
+    nSets = 1
+    
+    for i in range(1, 5):
+        rate = i/100
+        taskRates = genTaskRates(nTasks, rate, nSets)
+        taskPeriods = genTaskPeriods(nTasks, nSets, minPeriod, maxPeriod, minPeriod,"logunif")
+        taskSet = []
+        for ix,rate in enumerate(taskRates[0]):
+            taskSet.append((rate, taskPeriods[0][ix]))
+        scheduler = RunScheduler()
+        servers = scheduler.convertToSingletonServers(taskSet)
+        scheduler.reduceToUniserver(servers)
             
+    
+    
+    
+        
 
