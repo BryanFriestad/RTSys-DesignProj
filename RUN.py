@@ -8,11 +8,16 @@ class ServerEDF:
     deadline = -1
     
     def __init__(self, clients, rate, deadline):
-        self.rate = rate
-        self.deadline = deadline
+        
         self.clients = clients
-        self.rate = self.getRate()
-        self.deadline = self.getDeadline()
+        
+        if(rate == None) : self.rate = self.getRate()
+        else: self.rate = rate
+        
+        if(deadline == None): self.deadline = self.getDeadline()
+        else: self.deadline = deadline
+        
+        
         
     def getClients(self): 
         return self.clients
@@ -26,11 +31,11 @@ class ServerEDF:
         else: return self.rate
     
     def getDeadline(self):
-        if(self.rate == -1):
+        if(self.deadline == -1):
             latest = 0
             for client in self.clients:
                 if(client.getDeadline() > latest):
-                    latest = client.getDeadline
+                    latest = client.getDeadline()
             return latest
         else: return self.deadline
     
@@ -87,7 +92,6 @@ class ServerDual:
 class RunScheduler:
     def pack(self,duals):
         bins = self.worstFitBins(duals)
-
         return self.convertBinsToServers(bins)  
     
     def convertBinsToServers(self,bins):
@@ -95,9 +99,8 @@ class RunScheduler:
         for bin in bins:
             serverSet = []
             for dual in bin:
-                serverSet.append(dual.convertToEDFServer())           
+                serverSet.append(dual.convertToEDFServer())      
             servers.append(ServerEDF(serverSet, None, None))
-        
         return servers
         
     def worstFitBins(self,duals):
@@ -145,12 +148,14 @@ class RunScheduler:
         return servers
         
     def reduceToUniserver(self, servers):
-        #while(len(servers) > 1):
-        servers = self.dual(servers)
-        for server in servers:
-            print(server)
-        print(len(servers))
-        servers = self.pack(servers)
+        while(len(servers) > 1):
+            servers = self.dual(servers)
+            servers = self.pack(servers)
+            for server in servers:
+                print(server)
+            print()
+        print("-------------------")
+
  
 '''
 The following two functions were authored on GeeksforGeeks
@@ -191,7 +196,9 @@ def quickSort(arr,low,high):
         # partition and after partition 
         quickSort(arr, low, pi-1) 
         quickSort(arr, pi+1, high)            
-
+def printServers(servers):
+    for server in servers:
+        print(server)
 if __name__ == "__main__":
     #generate 100 task sets with n tasks = 17
     
@@ -201,7 +208,7 @@ if __name__ == "__main__":
     periodGranularity = minPeriod
     nSets = 1
     
-    for i in range(1, 5):
+    for i in range(100, 105):
         rate = i/100
         taskRates = genTaskRates(nTasks, rate, nSets)
         taskPeriods = genTaskPeriods(nTasks, nSets, minPeriod, maxPeriod, minPeriod,"logunif")
@@ -210,10 +217,11 @@ if __name__ == "__main__":
             taskSet.append((rate, taskPeriods[0][ix]))
         scheduler = RunScheduler()
         servers = scheduler.convertToSingletonServers(taskSet)
+        
         scheduler.reduceToUniserver(servers)
             
     
     
-    
+
         
 
