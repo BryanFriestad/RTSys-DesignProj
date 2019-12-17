@@ -4,6 +4,7 @@ from taskgen import gen_periods as genTaskPeriods
 import sys
 import Servers.ServerEDF
 import Servers.ServerDual
+import Task.EDFTask
 
 class RunScheduler:
     def pack(self,duals):
