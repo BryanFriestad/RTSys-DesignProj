@@ -5,7 +5,7 @@ class ServerEDF:
     clients = []
     rate = -1
     deadline = -1
-    executing = false
+    executing = False
     
     def __init__(self, clients, rate, deadline):
         
