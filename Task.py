@@ -1,12 +1,12 @@
 
 class EDFTask:
 
-	self.executing = False
-	self.deadline = 0
-	self.rCompute = 0
-	self.premptions = 0
-	self.prevTime = 0
-	self.isCompleted = False
+	executing = False
+	deadline = 0
+	rCompute = 0
+	premptions = 0
+	prevTime = 0
+	isCompleted = False
 
 	def __init__(self, deadline, rCompute):
 		'''
@@ -22,7 +22,7 @@ class EDFTask:
 		'''
 		expects absolute time
 		'''
-		if(isExecuting()):
+		if(self.isExecuting()):
 			self.rCompute = self.rCompute - (time-self.prevTime)
 		self.prevTime = time
 

@@ -1,15 +1,19 @@
 import copy
 import sys
-
+import Task
 class ServerEDF:
     clients = []
     rate = -1
     deadline = -1
-    executing = false
+    executing = False
+    parent = None
+    task = None
+    serverType = ""
     
-    def __init__(self, clients, rate, deadline):
+    def __init__(self, clients, rate, deadline, serverType="packed"):
         
         self.clients = clients
+        self.serverType = serverType
         
         if(rate == None) : self.rate = self.getRate()
         else: self.rate = rate
@@ -19,12 +23,40 @@ class ServerEDF:
         
         
     def setExecuting(self, a):
-        self.executing = True
+        self.executing = a
+        if(self.serverType == "packed"):
+            if(a):
+                index = getMinDeadlineIndex()
+                self.getClients()[index].setExecuting(True)
+            else:
+                print("Reached else")
+        else:
+            for client in self.getClients():
+                print(client)
+                client.setExecuting(not a)
+
+    def getMinDeadlineIndex(self):
+        minDeadline = 10000
+        minIndex = 0
+
+        for ix,client in enumerate(clients):
+            if(client.getTask().getDeadline() < minDeadline):
+                minDeadline = client.getTask().getDeadline()
+                minIndex = ix
+        return minIndex
 
     def isExecuting(self): return self.executing
 
     def getClients(self): 
         return self.clients
+    
+    def hasClients(self):
+        if(len(self.clients > 0)):
+            return True
+        return False
+
+    def setParent(self, parent): self.parent = parent
+    def getParent(self): return self.parent
     
     def getRate(self):
         if(self.rate == -1):
@@ -62,8 +94,18 @@ class ServerEDF:
         toSort = copy.deepcopy(self.clients)
         quickSort(toSort, 0, len(toSort)-1)
         return toSort
+
+    def initializeTasks(self):
+
+        if(len(self.getClients()) == 0):
+            self.task = Task.EDFTask(self.getDeadline(), self.getComputeTime())
+        else:
+            self.initializeTasks()
+            self.task = Task.EDFTask(self.getDeadline(), self.getComputeTime())
+
     def __str__(self):
-        return "Rate: " + str(self.rate) + " | Deadline: " + str(self.deadline)
+        return "Rate: " + "%0.2f"%self.rate + " | Deadline: " + str(self.deadline) + \
+                " | Executing: " + str(self.executing) + " | " + self.serverType
 
 class ServerDual:
         
@@ -76,10 +118,13 @@ class ServerDual:
         return self.rate
         
     def convertToEDFServer(self):
-        return ServerEDF(self.edfServer.getClients(), self.rate, self.deadline)
+        return ServerEDF(self.edfServer.getClients(), 
+                            self.rate, 
+                            self.deadline, 
+                            serverType="dual")
      
     def __str__(self):
-        return "Rate: " + str(self.rate) + " | Deadline: " + str(self.deadline)
+        return "Rate: " + "%0.2f"%self.getRate() + " | Deadline: " + str(self.deadline)
 
 
 
