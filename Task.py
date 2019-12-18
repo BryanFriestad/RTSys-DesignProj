@@ -67,3 +67,15 @@ class PFairTask:
 		self.deadline = pi
 		self.computeTime = ci
 
+        #updates the lag of this task depending on whether or not it executed
+	def updateLag(self, wasExecuted):
+                if(wasExecuted):
+                        lag -= (1 - (self.computetime / self.period))
+                else:
+                        lag += (self.computetime / self.period)
+
+        #returns the lag t time units in the future if this task does not execute
+        def futureLag(self, t):
+                return lag + t*(self.computetime / self.period)
+                        
+
