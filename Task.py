@@ -44,3 +44,26 @@ class EDFTask:
 		self.premptions += 1
 
 	def isCompleted(self): return self.completed
+
+
+class PFairTask:
+
+	self.readyTime = 0
+	self.period = 0
+	self.deadline = 0
+	self.computeTime = 0
+	self.lag = 0
+	self.allocatedTime = 0
+	self.premptions = 0
+	self.migrations = 0
+	self.isCompleted = False
+
+	def __init__(self, ri, pi, ci):
+		'''
+		initialized with compute time and period
+		'''
+		self.readyTime = ri
+		self.period = pi
+		self.deadline = pi
+		self.computeTime = ci
+
