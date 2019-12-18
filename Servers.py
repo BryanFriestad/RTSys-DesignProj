@@ -26,20 +26,25 @@ class ServerEDF:
         self.executing = a
         if(self.serverType == "packed"):
             if(a):
-                index = getMinDeadlineIndex()
-                self.getClients()[index].setExecuting(True)
+                index = self.getMinDeadlineIndex()
+                for ix,client in enumerate(self.getClients()):
+                    if(ix == index):
+                        client.setExecuting(a)
+                    else:
+                        client.setExecuting(not(a))
             else:
-                print("Reached else")
+                for client in self.getClients():
+                    client.setExecuting(a)
         else:
+            print(str(a))
             for client in self.getClients():
-                print(client)
-                client.setExecuting(not a)
+                client.setExecuting(not(a))
 
     def getMinDeadlineIndex(self):
         minDeadline = 10000
         minIndex = 0
 
-        for ix,client in enumerate(clients):
+        for ix,client in enumerate(self.getClients()):
             if(client.getTask().getDeadline() < minDeadline):
                 minDeadline = client.getTask().getDeadline()
                 minIndex = ix
@@ -57,6 +62,9 @@ class ServerEDF:
 
     def setParent(self, parent): self.parent = parent
     def getParent(self): return self.parent
+
+    def setTask(self, task): self.task = task
+    def getTask(self): return self.task
     
     def getRate(self):
         if(self.rate == -1):
@@ -97,10 +105,10 @@ class ServerEDF:
 
     def initializeTasks(self):
 
-        if(len(self.getClients()) == 0):
-            self.task = Task.EDFTask(self.getDeadline(), self.getComputeTime())
-        else:
-            self.initializeTasks()
+        self.task = Task.EDFTask(self.getDeadline(), self.getComputeTime())
+        if(not len(self.getClients()) == 0):
+            for client in self.getClients():
+                client.initializeTasks()
             self.task = Task.EDFTask(self.getDeadline(), self.getComputeTime())
 
     def __str__(self):

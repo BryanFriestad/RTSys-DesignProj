@@ -107,9 +107,15 @@ class RunScheduler:
                 buildServerTree(client)
 
 
-    def scheduleEDFServers(self, uniServer, time, processors):
+    def scheduleEDFServers(self, leaves, uniServer, time, processors):
         uniServer.initializeTasks()
-        uniServer.setExecuting()
+        uniServer.setExecuting(True)
+
+        printTree(uniServer)
+        print()
+        print("leaves___")
+        print()
+        printServers(leaves)
         '''
         for i in range(0, time):
 
@@ -166,7 +172,9 @@ if __name__ == "__main__":
     servers = scheduler.convertToSingletonServers(testTaskSet)
     uniServer, serversC = scheduler.reduceToUniserver(servers)
     printTree(uniServer[0])
-    scheduler.scheduleEDFServers(uniserver[0], 100, 1)
+    print()
+    print("___initial states ____")
+    scheduler.scheduleEDFServers(serversC, uniServer[0], 100, 1)
   
 
 ##Problem with reduction tree, all of the base servers are the duals not the

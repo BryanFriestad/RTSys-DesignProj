@@ -45,18 +45,19 @@ class EDFTask:
 
 	def isCompleted(self): return self.completed
 
+	def getDeadline(self): return self.deadline
 
 class PFairTask:
 
-	self.readyTime = 0
-	self.period = 0
-	self.deadline = 0
-	self.computeTime = 0
-	self.lag = 0
-	self.allocatedTime = 0
-	self.premptions = 0
-	self.migrations = 0
-	self.isCompleted = False
+	readyTime = 0
+	period = 0
+	deadline = 0
+	computeTime = 0
+	lag = 0
+	allocatedTime = 0
+	premptions = 0
+	migrations = 0
+	isCompleted = False
 
 	def __init__(self, ri, pi, ci):
 		'''
