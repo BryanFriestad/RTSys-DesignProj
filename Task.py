@@ -74,12 +74,12 @@ class EDFTask:
 
 class PFairTask:
 
-    self.readyTime = 0
-    self.period = 0
-    self.deadline = 0
-    self.computeTime = 0
-    self.lag = 0
-    self.isCompleted = False
+    readyTime = 0
+    period = 0
+    deadline = 0
+    computeTime = 0
+    lag = 0
+    isCompleted = False
 
     def __init__(self, ri, pi, ci):
         '''
