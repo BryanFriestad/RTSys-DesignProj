@@ -11,8 +11,10 @@ def lessThan(a, b):
     else:
         return True
 def printServers(servers):
+    print()
     for server in servers:
         print(server)
+        print()
 
 def printTree(server):
     if(len(server.getClients()) == 0):
@@ -31,8 +33,9 @@ def printTreeStatus(uniServer, leaves):
         printServers(leaves)
 
 def printProcessors(processors):
+    print()
     for processor in processors:
-        print(processor)
+        print("M:", processor)
 
 
 
@@ -123,41 +126,19 @@ class RunScheduler:
                         if processor.isFree():
                             processor.runTask(task)
                             break
-    def scheduleEDFServers(self, leaves, uniServer, time, processorCount):
-        
-        ### initialize ####
-        processors = []
-        for i in range(0, processorCount):
-            processors.append(Task.Processor())
+    
+    def assignJobsToProcessors(self, processors, jobs, time):
 
-        uniServer.initializeTasks()
-        uniServer.setExecuting(True)
-        #print("___initial states ____")
-        #printTreeStatus(uniServer,leaves)
-
-        ### test interior of loop ###
-        #update tasks
-        t = 1
-        for processor in processors:
-            if(not processor.updateTime(t)):
-                return False
-        
-        #find the m servers that are executing
-        runningServers = []
-        for server in leaves:
-            if server.isExecuting():
-                runningServers.append(server)
-
-        #assign running to current processor
-        for server in runningServers:
+         #assign running to current processor
+        for server in jobs:
             tsk = server.getTask()
             if tsk.isExecuting():
                 continue
-            elif tsk.isCompleted and (t % tsk.getDeadline()) == 0:
+            elif tsk.isCompleted and (time % tsk.getDeadline()) == 0:
                 tsk.remake()
 
         #assign idle to last-used processor
-        for server in runningServers:
+        for server in jobs:
             tsk = server.getTask()
             if tsk.isReady() and (tsk.getPrevProcessor() is not None):
                 if processors[tsk.getPrevProcessor()].isFree():
@@ -167,21 +148,45 @@ class RunScheduler:
             else:
                 self.assignToFreeProcessor(processors, tsk)
 
-        printServerStatus(uniServer, leaves)
-        printProcessors(processors)
+    def getExecutingServers(self, leaves):
+        runningServers = []
+        for server in leaves:
+            if server.isExecuting():
+                runningServers.append(server)
+        return runningServers
+
+    def scheduleEDFServers(self, leaves, uniServer, time, processorCount):
+        
+        ### initialize ####
+        processors = []
+        for i in range(0, processorCount):
+            processors.append(Task.Processor())
+
+        uniServer.initializeTasks()
+        uniServer.setExecuting(True)
+        
+
+        #### main loop ###
+        for t in range(0, time):
+            #update time
+            for processor in processors:
+                if(not processor.updateTime(t)):
+                    return False
+            
+            #find servers that have been released
+            for server in leaves:
+                tsk = server.getTask()
+                if(tsk.wasReleased()):
+                    server.release()
+                    tsk.clearReleasedFlag()
+
+            #find the m servers that are executing
+            runningServers = self.getExecutingServers(leaves)
+            
+            #assing those serverst to processors
+            self.assignJobsToProcessors(processors, runningServers, t)
 
         return True
-
-
-
- 
-
-def printClasses(server):
-        
-    if(len(server.getClients()) > 0):
-        for client in server.getClients():
-            printClasses(client)
-    print(server)
 
 if __name__ == "__main__":
     #generate 100 task sets with n tasks = 17
@@ -214,12 +219,7 @@ if __name__ == "__main__":
     scheduler = RunScheduler()
     servers = scheduler.convertToSingletonServers(testTaskSet)
     uniServer, serversC = scheduler.reduceToUniserver(servers)
-    scheduler.scheduleEDFServers(serversC, uniServer[0], 100, 1)
-  
-
-##Problem with reduction tree, all of the base servers are the duals not the
-##singletons    
-    
+    scheduler.scheduleEDFServers(serversC, uniServer[0], 5, 1)
 
         
 

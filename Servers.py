@@ -29,27 +29,45 @@ class ServerEDF:
         if(self.serverType == "packed"):
             if(a):
                 index = self.getMinDeadlineIndex()
-                for ix,client in enumerate(self.getClients()):
-                    if(ix == index):
-                        client.setExecuting(a)
-                    else:
-                        client.setExecuting(not(a))
+                if(index == -1): 
+                    self.setExecuting(False)
+                    return False
+                else:
+                    for ix,client in enumerate(self.getClients()):
+                        if(ix == index):
+                            client.setExecuting(a)
+                        else:
+                            client.setExecuting(not(a))
             else:
                 for client in self.getClients():
                     client.setExecuting(a)
         else:
-            print(str(a))
             for client in self.getClients():
                 client.setExecuting(not(a))
+        return True
+    def release(self):
+        if(self.parent is not None):
+            if(len(self.clients()) == 0):
+                self.parent.release()
+            else:
+                if(self.serverType=="dual"):
+                    parent.released()
+                if(self.serverType=="packed" and self.isExecuting()):
+                    if(not parent.setExecuting(True)):
+                        self.parent.release()
+
 
     def getMinDeadlineIndex(self):
         minDeadline = 10000
         minIndex = 0
-
+        if(len(self.getClients())>0):
+            minIndex = -1
         for ix,client in enumerate(self.getClients()):
-            if(client.getTask().getDeadline() < minDeadline):
+            if(client.getTask().getDeadline() < minDeadline 
+                and not(client.getTask().isCompleted())):
                 minDeadline = client.getTask().getDeadline()
                 minIndex = ix
+        if(minIndex == -1): print("error")
         return minIndex
 
     def isExecuting(self): return self.executing
@@ -115,29 +133,8 @@ class ServerEDF:
 
     def __str__(self):
         return "Rate: " + "%0.2f"%self.rate + " | Deadline: " + str(self.deadline) + \
-                " | Executing: " + str(self.executing) + " | " + self.serverType
-'''
-class ServerDual:
-        
-    def __init__(self, edfServer):
-        self.rate = 1 - edfServer.getRate()
-        self.deadline = edfServer.getDeadline()
-        self.edfServer = edfServer
-    
-    def getRate(self):
-        return self.rate
-        
-    def convertToEDFServer(self):
-        return ServerEDF(self.edfServer.getClients(), 
-                            self.rate, 
-                            self.deadline, 
-                            serverType="dual")
-     
-    def __str__(self):
-        return "Rate: " + "%0.2f"%self.getRate() + " | Deadline: " + str(self.deadline)
-
-'''
-
+                " | Executing: " + str(self.executing) + " | " + self.serverType + \
+                " ||\n\tTask " + str(self.task)
 '''
 The following two functions were authored on GeeksforGeeks
    https://www.geeksforgeeks.org/python-program-for-quicksort/

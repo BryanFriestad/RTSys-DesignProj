@@ -4,11 +4,12 @@ class EDFTask:
 	executing = False
 	deadline = 0
 	rCompute = 0
+	released = False
 	topCompute = 0
 	premptions = 0
 	prevTime = 0
 	ready = False
-	isCompleted = False
+	completed = False
 	previousProcessorId = None
 
 	def __init__(self, deadline, rCompute):
@@ -33,14 +34,15 @@ class EDFTask:
 
 		if(self.rCompute == 0): 
 			self.completed = True
+			self.released = True
 			self.executing = False
 			self.ready = False
 			return True
 
-		if(time > deadline):
+		if(time > self.deadline):
 			return False
 
-		if(time <= deadline):
+		if(time <= self.deadline):
 			return True
 	
 	def startExecuting(self): 
@@ -53,6 +55,8 @@ class EDFTask:
 		self.premptions += 1
 
 	def isCompleted(self): return self.completed
+	def wasReleased(self): return self.released
+	def clearReleaseFlag(self): self.released = False
 	def isReady(self): return self.ready
 
 	def getDeadline(self): return self.deadline
@@ -65,8 +69,8 @@ class EDFTask:
 
 
 	def __str__(self):
-		 return "rCompute: " + str(self.rCompute) + " | Deadline: " + str(self.deadline) + \
-                " | Executing: " + str(self.executing) 
+		 return "rCompute: " +  "%0.2f" %self.rCompute + " | Deadline: " + str(self.deadline) + \
+                " | Executing: " + str(self.executing) + "| Ready: " + str(self.ready)
 
 class PFairTask:
 
@@ -95,13 +99,14 @@ class Processor:
 	def updateTime(self,time):
 		if self.task is not None:
 			if(self.task.updateTime(time)):
-				if(self.task.isCompleted): 
+				if(self.task.isCompleted()): 
 					self.task = None
 			else: return False
 		else: return True
 
 	def runTask(self, task):
 		self.task = task
+		task.startExecuting()
 
 	def isFree(self): 
 		if(self.task is not None):
