@@ -53,9 +53,6 @@ class PFairTask:
 	self.deadline = 0
 	self.computeTime = 0
 	self.lag = 0
-	self.allocatedTime = 0
-	self.premptions = 0
-	self.migrations = 0
 	self.isCompleted = False
 
 	def __init__(self, ri, pi, ci):
