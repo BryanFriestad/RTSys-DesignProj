@@ -74,15 +74,12 @@ class EDFTask:
 
 class PFairTask:
 
-	readyTime = 0
-	period = 0
-	deadline = 0
-	computeTime = 0
-	lag = 0
-	allocatedTime = 0
-	premptions = 0
-	migrations = 0
-	isCompleted = False
+	self.readyTime = 0
+	self.period = 0
+	self.deadline = 0
+	self.computeTime = 0
+	self.lag = 0
+	self.isCompleted = False
 
 	def __init__(self, ri, pi, ci):
 		'''
@@ -93,6 +90,17 @@ class PFairTask:
 		self.deadline = pi
 		self.computeTime = ci
 
+        #updates the lag of this task depending on whether or not it executed
+	def updateLag(self, wasExecuted):
+                if(wasExecuted):
+                        lag -= (1 - (self.computetime / self.period))
+                else:
+                        lag += (self.computetime / self.period)
+
+        #returns the lag t time units in the future if this task does not execute
+        def futureLag(self, t):
+                return lag + t*(self.computetime / self.period)
+          
 class Processor:
 
 	task = None
@@ -115,4 +123,6 @@ class Processor:
 			return True
 
 	def __str__(self):
-		return str(self.task)
+		return str(self.task) 
+                        
+
