@@ -23,6 +23,18 @@ def printTree(server):
         printTree(client)
         print("Parent: " + str(server))
 
+def printTreeStatus(uniServer, leaves):
+        printTree(uniServer)
+        print()
+        print("leaves___")
+        print()
+        printServers(leaves)
+
+def printProcessors(processors):
+    for processor in processors:
+        print(processor)
+
+
 
 class RunScheduler:
     def pack(self,servers):
@@ -106,26 +118,57 @@ class RunScheduler:
             if client.hasClients():
                 buildServerTree(client)
 
+    def assignToFreeProcessor(self, processors, task):
+        for processor in processors:
+                        if processor.isFree():
+                            processor.runTask(task)
+                            break
+    def scheduleEDFServers(self, leaves, uniServer, time, processorCount):
+        
+        ### initialize ####
+        processors = []
+        for i in range(0, processorCount):
+            processors.append(Task.Processor())
 
-    def scheduleEDFServers(self, leaves, uniServer, time, processors):
         uniServer.initializeTasks()
         uniServer.setExecuting(True)
+        #print("___initial states ____")
+        #printTreeStatus(uniServer,leaves)
 
-        printTree(uniServer)
-        print()
-        print("leaves___")
-        print()
-        printServers(leaves)
-        '''
-        for i in range(0, time):
+        ### test interior of loop ###
+        #update tasks
+        t = 1
+        for processor in processors:
+            if(not processor.updateTime(t)):
+                return False
+        
+        #find the m servers that are executing
+        runningServers = []
+        for server in leaves:
+            if server.isExecuting():
+                runningServers.append(server)
 
-            
-            for server in singletonServers:
-                if(time % server.getDeadline() == 0):
-                    queue.append(EDFTask(time + server.getDeadline(), 
-                                 server.getDeadline() * server.getRate())))
-            
-        '''
+        #assign running to current processor
+        for server in runningServers:
+            tsk = server.getTask()
+            if tsk.isExecuting():
+                continue
+            elif tsk.isCompleted and (t % tsk.getDeadline()) == 0:
+                tsk.remake()
+
+        #assign idle to last-used processor
+        for server in runningServers:
+            tsk = server.getTask()
+            if tsk.isReady() and (tsk.getPrevProcessor() is not None):
+                if processors[tsk.getPrevProcessor()].isFree():
+                    processors[tsk.getPrevProcessor()].runTask(tsk)
+                else:
+                    self.assignToFreeProcessor(processors, tsk)        
+            else:
+                self.assignToFreeProcessor(processors, tsk)
+
+        printServerStatus(uniServer, leaves)
+        printProcessors(processors)
 
         return True
 
@@ -171,9 +214,6 @@ if __name__ == "__main__":
     scheduler = RunScheduler()
     servers = scheduler.convertToSingletonServers(testTaskSet)
     uniServer, serversC = scheduler.reduceToUniserver(servers)
-    printTree(uniServer[0])
-    print()
-    print("___initial states ____")
     scheduler.scheduleEDFServers(serversC, uniServer[0], 100, 1)
   
 

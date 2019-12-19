@@ -20,6 +20,8 @@ class ServerEDF:
         
         if(deadline == None): self.deadline = self.getDeadline()
         else: self.deadline = deadline
+
+        self.task = Task.EDFTask(deadline, self.getComputeTime())
         
         
     def setExecuting(self, a):
@@ -114,7 +116,7 @@ class ServerEDF:
     def __str__(self):
         return "Rate: " + "%0.2f"%self.rate + " | Deadline: " + str(self.deadline) + \
                 " | Executing: " + str(self.executing) + " | " + self.serverType
-
+'''
 class ServerDual:
         
     def __init__(self, edfServer):
@@ -134,7 +136,7 @@ class ServerDual:
     def __str__(self):
         return "Rate: " + "%0.2f"%self.getRate() + " | Deadline: " + str(self.deadline)
 
-
+'''
 
 '''
 The following two functions were authored on GeeksforGeeks
