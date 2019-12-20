@@ -1,5 +1,14 @@
 from Task import PFairTask as PFairTask
 
+def countPreemptions(schedule):
+    count = 0
+    for x in range(1, len(schedule)):
+        for y in range(len(schedule[x])):
+            if(schedule[x][y] != schedule[x-1][y]):
+                if(schedule[x-1][y] is not None):
+                    count += 1
+    return count
+
 class PFScheduler:
     
     def __init__(self, processorCount):
@@ -86,6 +95,9 @@ class PFScheduler:
                 scheduled_tasks.append(t) #add remaining tasks to the scheduled task list
             remaining_processor_slots -= len(tied_tasks) #remove available processors
             i += 1
+
+        for x in range(remaining_processor_slots):
+            scheduled_tasks.append(None)
             
         print("Scheduled tasks" + str(scheduled_tasks))
 
@@ -93,7 +105,8 @@ class PFScheduler:
         self.schedule.append(scheduled_tasks)
         
         for t in scheduled_tasks:
-            t.remainingCompute -= 1 #reduce 1 from remainingCompute of all executed tasks
+            if(t is not None):
+                t.remainingCompute -= 1 #reduce 1 from remainingCompute of all executed tasks
 
         #updates lag of all tasks
         for t in urgent_tasks:
@@ -122,10 +135,12 @@ if __name__ == "__main__":
     processors = 2
     scheduler = PFScheduler(processors)
     end_sched = scheduler.generateSchedule(test_set, runtime)
-    for frame in end_sched:
-        print(frame)
+    for x in range(processors):
+        for frame in end_sched:
+            print(frame[x]),
+        print
 
-def countPreemptions(schedule):
-    return
+    print("Preemptions: " + str(countPreemptions(end_sched)))
+
         
     

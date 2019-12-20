@@ -55,16 +55,15 @@ class PFairTask:
 		self.inst_num = inst
 
         def __repr__(self):
-                return "Task %s->instance %s->lag = %s" % (self.task_num, self.inst_num, self.lag)
+                return "Task %s->instance %s" % (self.task_num, self.inst_num)
 
         def __str__(self):
-                return "Task %s->instance %s->lag = %s" % (self.task_num, self.inst_num, self.lag)
+                return "Task %s->instance %s" % (self.task_num, self.inst_num)
 
         #updates the lag of this task depending on whether or not it executed
 	def updateLag(self, wasExecuted):
                 if(wasExecuted):
                         self.lag -= (1.0 - (self.computeTime / self.period))
-                        print("Here!")
                 else:
                         self.lag += (self.computeTime / self.period)
 
