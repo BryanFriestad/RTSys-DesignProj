@@ -1,6 +1,8 @@
+from __future__ import division
 from Task import PFairTask as PFairTask
 import taskgen
 import numpy
+import random
 
 def countPreemptions(schedule):
     count = 0
@@ -18,6 +20,7 @@ class PFScheduler:
         self.tasks = []
         self.time = 0
         self.schedule = []
+        self.num_jobs = 0
 
     def generateSchedule(self, taskset, runTime):
         self.initTaskInstances(taskset, runTime)
@@ -40,7 +43,8 @@ class PFScheduler:
                 self.tasks.append(PFairTask(ri, task[0], period, iden, i, j)) #add an instance to the task list
                 iden += 1
         #print("Task set: " + str(self.tasks))
-        #print
+        self.num_jobs = len(self.tasks)
+        print("Total number of jobs: " + str(len(self.tasks)))
 
     def scheduleFrame(self):
         urgent_tasks = []
@@ -132,34 +136,50 @@ class PFScheduler:
         #print 
         
 if __name__ == "__main__":
-    task_set = []
-    runtime = 1000
-    processors = 4
-    utilization = 3
-    num_tasks = 5
-    min_period = 5
-    max_period = 100
+    avg = 0
+    tasks = 0
+    reps = 25
+    for r in range(reps):
+        task_set = []
+        runtime = 1000
+        processors = 4
+        utilization = 0.1
+        num_tasks = 32
+        min_period = 5
+        max_period = 100
 
-    x = taskgen.StaffordRandFixedSum(num_tasks, utilization, 1)
-    periods = taskgen.gen_periods(num_tasks, 1, min_period, max_period, min_period, "logunif")
-    #iterate through each row (which represents utils for a taskset)
-    for i in range(numpy.size(x, axis=0)):
-        C = x[i] * periods[i]
-        C = numpy.round(C, decimals=0)
-        for j in range(len(C)):
-            task = [int(C[j]), int(periods[i][j])]
-            task_set.append(task)
-        
-    print(task_set)
-    scheduler = PFScheduler(processors)
-    end_sched = scheduler.generateSchedule(task_set, runtime)
-    '''
-    for x in range(processors):
-        for frame in end_sched:
-            print(frame[x]),
+        x = taskgen.StaffordRandFixedSum(num_tasks, utilization * processors, 1)
+        periods = taskgen.gen_periods(num_tasks, 1, min_period, max_period, min_period, "unif")
+        #iterate through each row (which represents utils for a taskset)
+        for i in range(numpy.size(x, axis=0)):
+            C = x[i] * periods[i]
+            C = numpy.trunc(C)
+            for j in range(len(C)):
+                task = [int(C[j]), int(periods[i][j])]
+                task_set.append(task)
+
+        final_taskset = []
+        for t in task_set:
+            if(t[0] != 0):
+                final_taskset.append(t)
+        tasks += len(final_taskset)
+        print(final_taskset)
+        scheduler = PFScheduler(processors)
+        end_sched = scheduler.generateSchedule(final_taskset, runtime)
+        '''
+        for x in range(processors):
+            for frame in end_sched:
+                print(frame[x]),
+            print
+        '''
+        preemp_count = countPreemptions(end_sched)
+        instance_count = scheduler.num_jobs
+        print("Preemptions/Instance: " + str(preemp_count/instance_count))
+        avg += preemp_count/instance_count
         print
-    '''
-    print("Preemptions: " + str(countPreemptions(end_sched)))
+    avg = avg / reps
+    print("average = " + str(avg))
+    print("total tasks = " + str(tasks))
 
         
     
