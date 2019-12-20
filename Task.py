@@ -1,6 +1,6 @@
-
+from __future__ import division
+'''
 class EDFTask:
-
 	self.executing = False
 	self.deadline = 0
 	self.rCompute = 0
@@ -9,9 +9,7 @@ class EDFTask:
 	self.isCompleted = False
 
 	def __init__(self, deadline, rCompute):
-		'''
-		initialized with compute time and absolute deadline
-		'''
+		#initialized with compute time and absolute deadline
 		self.deadline = deadline
 		self.rCompute = rCompute
 		self.executing = True
@@ -19,9 +17,7 @@ class EDFTask:
 	def isExecuting(self): return self.executing
 
 	def updateTime(self, time):
-		'''
-		expects absolute time
-		'''
+		#expects absolute time
 		if(isExecuting()):
 			self.rCompute = self.rCompute - (time-self.prevTime)
 		self.prevTime = time
@@ -44,35 +40,44 @@ class EDFTask:
 		self.premptions += 1
 
 	def isCompleted(self): return self.completed
-
+'''
 
 class PFairTask:
-
-	self.readyTime = 0
-	self.period = 0
-	self.deadline = 0
-	self.computeTime = 0
-	self.lag = 0
-	self.isCompleted = False
-
-	def __init__(self, ri, pi, ci):
-		'''
-		initialized with compute time and period
-		'''
-		self.readyTime = ri
+	def __init__(self, ri, ci, pi, iden, task, inst):
+                self.readyTime = ri
 		self.period = pi
 		self.deadline = pi
 		self.computeTime = ci
+		self.remainingCompute = ci
+		self.id = iden
+		self.lag = 0
+		self.task_num = task
+		self.inst_num = inst
+
+        def __repr__(self):
+                return "Task %s->instance %s->lag = %s" % (self.task_num, self.inst_num, self.lag)
+
+        def __str__(self):
+                return "Task %s->instance %s->lag = %s" % (self.task_num, self.inst_num, self.lag)
 
         #updates the lag of this task depending on whether or not it executed
 	def updateLag(self, wasExecuted):
                 if(wasExecuted):
-                        lag -= (1 - (self.computetime / self.period))
+                        self.lag -= (1.0 - (self.computeTime / self.period))
+                        print("Here!")
                 else:
-                        lag += (self.computetime / self.period)
+                        self.lag += (self.computeTime / self.period)
 
         #returns the lag t time units in the future if this task does not execute
         def futureLag(self, t):
-                return lag + t*(self.computetime / self.period)
+                return self.lag + t*(self.computeTime / self.period)
+
+        #returns whether or not the task is urgent
+        def isUrgent(self):
+                return (self.lag > 0.0) & (self.lag - (1.0 - (self.computeTime / self.period)) >= 0.0)
+
+        #returns whether or not the task is tnegru
+        def isTnegru(self):
+                return (self.lag < 0.0) & (self.lag + (self.computeTime / self.period) <= 0.0)
                         
 
