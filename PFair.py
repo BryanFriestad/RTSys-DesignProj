@@ -1,4 +1,6 @@
 from Task import PFairTask as PFairTask
+import taskgen
+import numpy
 
 def countPreemptions(schedule):
     count = 0
@@ -37,8 +39,8 @@ class PFScheduler:
                 j += 1
                 self.tasks.append(PFairTask(ri, task[0], period, iden, i, j)) #add an instance to the task list
                 iden += 1
-        print("Task set: " + str(self.tasks))
-        print
+        #print("Task set: " + str(self.tasks))
+        #print
 
     def scheduleFrame(self):
         urgent_tasks = []
@@ -54,9 +56,9 @@ class PFScheduler:
                 else:
                     safe_tasks.append(task) #all of the remaining tasks
 
-        print("Urgent tasks: " + str(urgent_tasks))
-        print("Tnegru tasks: " + str(tnegru_tasks))
-        print("Safe tasks: " + str(safe_tasks))
+        #print("Urgent tasks: " + str(urgent_tasks))
+        #print("Tnegru tasks: " + str(tnegru_tasks))
+        #print("Safe tasks: " + str(safe_tasks))
 
         #for this frame, all processors are unallocated at this point
         remaining_processor_slots = self.numProc
@@ -77,10 +79,10 @@ class PFScheduler:
                 break; #this means all safe tasks have been scheduled already
             tied_tasks = []
             for t in safe_tasks:
-                print("future lag of " + str(t) + ": " + str(t.futureLag(i)))
+                #print("future lag of " + str(t) + ": " + str(t.futureLag(i)))
                 if(t.futureLag(i) > 0):
                     tied_tasks.append(t) #gets all tasks which will have positive lag at time+i
-            print("Tied tasks" + str(tied_tasks))
+            #print("Tied tasks" + str(tied_tasks))
             tied_tasks = [t for t in tied_tasks if t not in scheduled_tasks] #removes ones already scheduled
             while(len(tied_tasks) > remaining_processor_slots):
                 #remove the tied task with smallest lag at time
@@ -99,7 +101,7 @@ class PFScheduler:
         for x in range(remaining_processor_slots):
             scheduled_tasks.append(None)
             
-        print("Scheduled tasks" + str(scheduled_tasks))
+        #print("Scheduled tasks" + str(scheduled_tasks))
 
         #TODO: after determining the tasks to be scheduled, assign them to reduce preemptions
         self.schedule.append(scheduled_tasks)
@@ -127,19 +129,36 @@ class PFScheduler:
         self.tasks = list(incomplete_tasks)
             
         self.time += 1
-        print 
+        #print 
         
 if __name__ == "__main__":
-    test_set = [[3, 5], [4, 5], [5, 10]]
-    runtime = 10
-    processors = 2
+    task_set = []
+    runtime = 1000
+    processors = 4
+    utilization = 3
+    num_tasks = 5
+    min_period = 5
+    max_period = 100
+
+    x = taskgen.StaffordRandFixedSum(num_tasks, utilization, 1)
+    periods = taskgen.gen_periods(num_tasks, 1, min_period, max_period, min_period, "logunif")
+    #iterate through each row (which represents utils for a taskset)
+    for i in range(numpy.size(x, axis=0)):
+        C = x[i] * periods[i]
+        C = numpy.round(C, decimals=0)
+        for j in range(len(C)):
+            task = [int(C[j]), int(periods[i][j])]
+            task_set.append(task)
+        
+    print(task_set)
     scheduler = PFScheduler(processors)
-    end_sched = scheduler.generateSchedule(test_set, runtime)
+    end_sched = scheduler.generateSchedule(task_set, runtime)
+    '''
     for x in range(processors):
         for frame in end_sched:
             print(frame[x]),
         print
-
+    '''
     print("Preemptions: " + str(countPreemptions(end_sched)))
 
         
